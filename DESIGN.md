@@ -52,6 +52,30 @@ actor verifier
 verifier->>watcher: Request verification
 watcher->>verifier: Verification result
 ```
+## Architecture
+System requirements:
+* Run as a persistent process in a backend server
+* Developed in Python since it depends on main KERI/ACDC library [keripy](https://github.com/WebOfTrust/keripy)
+* Perfom periodic and on demand queries to witnesses
+* Permanent crawl of Cardano transaction metadata and maintain sync
+* Provide API for verifiers
+* Provide web portal for verifiers
+* Persistent database of AIDs and witnesses
+* Persistent log of transactions
 
 
 ## Feature set
+### Required features
+* detect and register AIDs to watch
+* register witnesses to watch
+* crawl Cardano tx metadata, detect and validate Key Events
+* crawl witnesses to detect new key events and validate
+* monitor witnesses
+* API to verify AID
+* Web portal to verify AID
+* Web portal with metrics and statistics
+
+
+### Future features
+* signature verification
+* ACDC verification
