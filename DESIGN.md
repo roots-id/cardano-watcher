@@ -63,6 +63,13 @@ System requirements:
 * Persistent database of AIDs and witnesses
 * Persistent log of transactions
 
+The following diagram shows the basic components of the system:
+![Architecture](Architecture.jpg)
+1. Blockchain crawler
+2. Witness polling
+3. Verifiers API
+4. Verifiers Web Portal
+5. Verificarion engine and processing
 
 ## Feature set
 ### Required features
