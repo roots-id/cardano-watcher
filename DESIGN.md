@@ -65,11 +65,12 @@ System requirements:
 
 The following diagram shows the basic components of the system:
 ![Architecture](Architecture.jpg)
-1. Blockchain crawler
-2. Witness polling
-3. Verifiers API
-4. Verifiers Web Portal
-5. Verificarion engine and processing
+1. **Blockchain crawler**: this component is in charge of retrieving blocks from the blockchain, detecting if a transaction with metadata correspond to a key event and submiting the event to the verification engine. It must ensure to be fully in sync with the blockchain past and current state. If needed, the service must replay the full blockchain and ensure its validity. 
+2. **Witness polling**: this service must poll through the set of known witnesses and request latest Key Events from known AIDs. New events must be submitted to the verification engine to be validated. Additionally, the polling mechanism should be use to generate availability statistics for the known witnesses.
+3. **Verifiers API**: this API must expose an endpoint to verifiers to submit verificarion request of a certain AID. The API should also provide methods to request additions of AIDs and Witnesses to the monitoring poll. 
+4. **Verifiers Web Portal**: this component is a web app designed to be public and available for verifiers to request verification from a GUI. It should also provide statistics of the service and known entities.
+5. **Verificarion engine and processing**: this is teh service that actual perfome the KEL verification to detect duplicity and inconsistems events produces by dishonest identity controllers or malicious third party that may have exploited vulnerabilities on the controller of the identifier. In the future this engine will be use to validate ACDC credentials. 
+6. **Database**: persitent storage of KELs, events and transactions
 
 ## Feature set
 ### Required features
