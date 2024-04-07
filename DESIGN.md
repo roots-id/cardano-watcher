@@ -74,14 +74,14 @@ The following diagram shows the basic components of the system:
 
 ## Feature set
 ### Required features
-* detect and register AIDs to watch
-* register witnesses to watch
-* crawl Cardano tx metadata, detect and validate Key Events
-* crawl witnesses to detect new key events and validate
-* monitor witnesses
-* API to verify AID
-* Web portal to verify AID
-* Web portal with metrics and statistics
+* detect and register AIDs to watch: provide a way to add new identifiers by an API and a web portal. Additionally, any Key Event of a new identifier detected in the blockchain should register the new identifier
+* register witnesses to watch: provide a way to add new witnesses by an API and a web portal.
+* crawl Cardano tx metadata, detect and validate Key Events: the system should crawl the block chain to detect Key Events and validate its integrity. Results of the verification should be stored and made public to verifiers.
+* crawl witnesses to detect new key events and validate: for AIDs that use witnesses instead of the blockchain, its witnesses must be queried to get the KELs and perform validation. Results of the verification should be stored and made public to verifiers.
+* monitor witnesses: know witnesses should be monitored for statistical purposes of availability.
+* API to verify AID: the verification process should be exposed in a public API
+* Web portal to verify AID: the verificarion process should be available in a public web portal
+* Web portal with metrics and statistics: the web portal should show metrics and statistics of it elements and known witnesses.
 
 ### Features requested(future)
 * signature verification
