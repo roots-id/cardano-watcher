@@ -76,6 +76,6 @@ System requirements:
 * Web portal with metrics and statistics
 
 
-### Future features
+### Features request(future)
 * signature verification
 * ACDC verification
