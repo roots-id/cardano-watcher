@@ -4,7 +4,7 @@
 The folloging diagram of a generic KERI/ACDC ecosystem shows the **Cardano Watcher** positioned between the secondary root of trust provided by witnesses and the Cardano blockchain and the verifiers:
 ![Ecosystem](Cardano_Watcher_Ecosystem.jpg)
 
-# Flow of events
+## Flow of events
 The following sequence diagrams show a simplified flow of events for three different cases:
 1. an AID witnessed by a set of witnesses
 2. an AID witnessed by a Cardano Backer
@@ -82,7 +82,6 @@ The following diagram shows the basic components of the system:
 * Web portal to verify AID
 * Web portal with metrics and statistics
 
-
-### Features request(future)
+### Features requested(future)
 * signature verification
 * ACDC verification
