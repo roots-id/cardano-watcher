@@ -1,7 +1,7 @@
 # Cardano Watcher Design
 
 ## Ecosystem
-The folloging diagram of a generic KERI/ACDC ecosystem shows the **Cardano Watcher** positioned between the secondary root of trust provided by witnesses and the Cardano blockchain and the verifiers:
+The folloging diagram of a generic KERI/ACDC ecosystem shows the **Cardano Watcher** positioned between the secondary root of trust provided by witnesses and the Cardano blockchain, and the verifiers:
 ![Ecosystem](Cardano_Watcher_Ecosystem.jpg)
 
 ## Flow of events
