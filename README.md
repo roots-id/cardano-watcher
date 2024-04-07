@@ -16,7 +16,7 @@ In this case we are developing a **Cardano Watcher** that is primarily focused o
 
 ## Project resources
 * [Catalyst Project](https://projectcatalyst.io/funds/11/cardano-open-developers/gleif-network-super-watcher-on-cardano-by-rootsid-725aa) proposal, funds allocated and distributed 
-* Catalys Project [milestones].(https://milestones.projectcatalyst.io/projects/1100144) and Proofs of Achievement.
+* Catalys Project [milestones](https://milestones.projectcatalyst.io/projects/1100144) and Proofs of Achievement.
 * [Design](DESIGN.md)
 * [Project Plan](https://github.com/roots-id/cardano-watcher/milestones) and followup
 * [License](LICENSE)
