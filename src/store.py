@@ -13,7 +13,6 @@ mongo = MongoClient(
     authSource="admin"
 )
 
-
 db = mongo.watcher
 
 def list_aids():
@@ -21,7 +20,6 @@ def list_aids():
     return list(aids)
 
 def store_aid(aid):
-    # TODO resolve OOBI first
     aid['_id'] = aid['prefix']
     db.wits.insert_one(aid)
 
@@ -30,7 +28,6 @@ def list_witnesses():
     return list(aids)
 
 def store_witness(wit):
-    # TODO resolve OOBI first
     wit['_id'] = wit['prefix']
     db.wits.insert_one(wit)
 
