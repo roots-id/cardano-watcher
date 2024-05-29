@@ -20,14 +20,25 @@ def list_aids():
     return list(aids)
 
 def store_aid(aid):
-    aid['_id'] = aid['prefix']
-    db.wits.insert_one(aid)
+    db.aids.replace_one({"prefix": aid['prefix']}, aid, upsert=True)
+
+def get_aid(prefix):
+    return db.aids.find_one({"prefix": prefix},{'_id': 0})
 
 def list_witnesses():
-    aids = db.aids.find({},{'_id': 0})
+    aids = db.wits.find({},{'_id': 0})
     return list(aids)
 
 def store_witness(wit):
-    wit['_id'] = wit['prefix']
-    db.wits.insert_one(wit)
+    db.wits.replace_one({"prefix": wit['prefix']}, wit, upsert=True)
+
+def store_kel(prefix, kel):
+    if current_kel := db.kels.find_one({"prefix": prefix}):
+        if kel != current_kel['kel']:
+            db.kels.insert_one({"prefix": prefix, "kel": kel, "timestamp": datetime.datetime.now()})
+            print("KEL updated for aid ", prefix)
+    else:
+        db.kels.insert_one({"prefix": prefix, "kel": kel, "timestamp": datetime.datetime.now()})
+        print("KEL added for aid ", prefix)
+
 
