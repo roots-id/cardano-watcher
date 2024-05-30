@@ -14,8 +14,13 @@ from keri.help import helping
 import datetime
 from keri.app.cli.common import displaying
 from keri.db import dbing
-from keri.core.eventing import Siger
+from keri.core.eventing import Siger, Kevery
 from keri.core.parsing import Parser
+from keri.core import serdering
+from keri.kering import sniff, Version
+from keri.core.coring import Counter
+
+
 
 from store import get_aid, store_kel
 import requests
@@ -107,10 +112,18 @@ class Agent:
             kel = res.text
             store_kel(prefix, kel)
             
-            print(kel)
-            parser = Parser(framed = False)
-            parser.parse(ims=bytearray(kel, encoding='utf8'))
-            print(parser.ims)
+            # print(kel)
+            # ims=bytearray(kel, encoding='utf8')
+            # cold = sniff(ims=ims)
+            # print(cold)
+            # serdery = serdering.Serdery(version=Version)
+            # serder = serdery.reap(ims=ims)
+            # print(isinstance(serder, serdering.SerderKERI))
+            # print(serder.ked)
+            # cold = sniff(ims=ims)
+            # print(cold)
+            # ctr = yield from Parser()._extractor(ims=ims, klas=Counter, cold=cold)
+            # print(ctr.code)
 
             return kel
             

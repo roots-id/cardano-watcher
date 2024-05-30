@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from store import list_aids, store_aid, list_witnesses, store_witness
 from agent import Agent
 from contextlib import asynccontextmanager
+from poller import WitnessPoller, CardanoPoller
 
 import os
 import json
@@ -15,6 +16,8 @@ import json
 async def lifespan(app: FastAPI):
     app.state.agent = Agent(name='watcher', bran='HCJhWE8E9DTP69BI1Kdk1')
     app.state.agent.initWallet()
+    WitnessPoller(agent=app.state.agent).start()
+    CardanoPoller().start()
     yield
 
 

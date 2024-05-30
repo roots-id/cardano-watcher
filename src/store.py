@@ -33,11 +33,14 @@ def store_witness(wit):
     db.wits.replace_one({"prefix": wit['prefix']}, wit, upsert=True)
 
 def store_kel(prefix, kel):
-    if current_kel := db.kels.find_one({"prefix": prefix}):
-        if kel != current_kel['kel']:
+    current_kel = db.kels.find({"prefix": prefix}).sort([('timestamp', -1)]).limit(1)
+    try:
+        if len(kel) != len(current_kel[0]['kel']):
             db.kels.insert_one({"prefix": prefix, "kel": kel, "timestamp": datetime.datetime.now()})
             print("KEL updated for aid ", prefix)
-    else:
+        else:
+            print("KEL without changes for ", prefix)
+    except IndexError:
         db.kels.insert_one({"prefix": prefix, "kel": kel, "timestamp": datetime.datetime.now()})
         print("KEL added for aid ", prefix)
 

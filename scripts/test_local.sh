@@ -21,3 +21,7 @@ kli rotate --name local1 --alias aid1
 
 curl localhost:8000/aids/EF3V0uUvP3o4awSSNqJ9wUpG_BdamZgr9S9K_GLNWDZ9
 
+kli rotate --name local1 --alias aid1
+
+curl localhost:8000/aids/EF3V0uUvP3o4awSSNqJ9wUpG_BdamZgr9S9K_GLNWDZ9
+
