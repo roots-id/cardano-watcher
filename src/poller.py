@@ -40,6 +40,5 @@ class Poller(threading.Thread):
             for meta in metadatas:
                 msg = ''.join(meta.json_metadata)
                 self.agent.parseMsg(msg)
-                break
             time.sleep(30)
 
