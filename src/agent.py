@@ -105,6 +105,7 @@ class Agent:
             print(f'\t{idx+1}. {verfer.qb64}')
         print()
         return 
+        
     def watchAID(self, prefix):
         aid = get_aid(prefix)
         if self.resolveOobi(alias=aid['alias'], oobi=aid['oobi']):

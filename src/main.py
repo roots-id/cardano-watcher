@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
     app.state.agent = Agent(name='watcher', bran='HCJhWE8E9DTP69BI1Kdk1')
     app.state.agent.initWallet()
     WitnessPoller(agent=app.state.agent).start()
-    CardanoPoller().start()
+    CardanoPoller(agent=app.state.agent).start()
     yield
 
 
