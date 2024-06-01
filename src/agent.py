@@ -20,9 +20,7 @@ from keri.core import serdering
 from keri.kering import sniff, Version
 from keri.core.coring import Counter
 
-
-
-from store import get_aid, store_kel
+from store import get_aid, store_aid, store_kel, get_kel
 import requests
 
 
@@ -54,79 +52,93 @@ class Agent:
         hby = existing.setupHby(name='watcher', bran=self.bran)
         obr = hby.db.roobi.get(keys=(oobi,))
         if obr:
-            res = requests.get(oobi)
-            kel = res.text
-            store_kel(obr.cid, kel)
-            return obr.cid
+            prefix = obr.cid
+            kever = hby.kevers[prefix]
+            # ser = kever.serder
+            # print("{}: {}".format('AID', prefix))
+            # print("Seq No:\t{}".format(kever.sner.num))
+            cloner = hby.db.clonePreIter(pre=prefix, fn=0)  # create iterator at 0
+            for msg in cloner:
+                srdr = serdering.SerderKERI(raw=msg)
+                # print(srdr.pretty())
+                store_kel(prefix, srdr.sn, msg.decode("utf-8"))
+            hby.close()
+            return prefix
         else:
+            hby.close()
             return None
         
-    def queryAID(self, prefix):
-        # doers = [QueryDoer(name=self.name, alias=self.name,bran=self.bran, pre=prefix)]
-        # directing.runController(doers=doers, expire=0.0)
-        hby = existing.setupHby(name='watcher', bran=self.bran)
-        kever = hby.kevers[prefix]
-        ser = kever.serder
-        dgkey = dbing.dgKey(ser.preb, ser.saidb)
-        wigs = hby.db.getWigs(dgkey)
-        dgkey = dbing.dgKey(ser.preb, kever.lastEst.d)
-        anchor = hby.db.getAes(dgkey)
-        hby.db.getEvt
+    # def queryAID(self, prefix):
+    #     # doers = [QueryDoer(name=self.name, alias=self.name,bran=self.bran, pre=prefix)]
+    #     # directing.runController(doers=doers, expire=0.0)
+    #     hby = existing.setupHby(name='watcher', bran=self.bran)
+    #     kever = hby.kevers[prefix]
+    #     ser = kever.serder
+    #     dgkey = dbing.dgKey(ser.preb, ser.saidb)
+    #     wigs = hby.db.getWigs(dgkey)
+    #     dgkey = dbing.dgKey(ser.preb, kever.lastEst.d)
+    #     anchor = hby.db.getAes(dgkey)
+    #     hby.db.getEvt
 
+    #     print(kever.state())
+    #     print(kever.serder.ked)
 
-        # if sn is not None:
-        #     said = self.hab.db.getKeLast(key=dbing.snKey(pre=preb,
-        #                                                 sn=sn))
-
-        print(kever.state())
-        print(kever.serder.ked)
-
-        print("AID", prefix)
-        print("Seq No:\t{}".format(kever.sner.num))
-        if kever.delegated:
-            print("Delegated Identifier")
-            print(f"    Delegator:  {kever.delegator} ")
-            if anchor:
-                print("Anchored")
-            else:
-                print("Not Anchored")
-            print()
-
-
-        print("\nWitnesses:")
-        print("Count:\t\t{}".format(len(kever.wits)))
-        print("Receipts:\t{}".format(len(wigs)))
-        wigers = [Siger(qb64b=bytes(wig)) for wig in wigs]
-        print(wigers[0].qb64b)
-        print(wigers[1].qb64b)
-        print("Threshold:\t{}".format(kever.toader.num))
-        print("\nPublic Keys:\t")
-        for idx, verfer in enumerate(kever.verfers):
-            print(f'\t{idx+1}. {verfer.qb64}')
-        print()
-        return 
+    #     return 
         
     def watchAID(self, prefix):
         aid = get_aid(prefix)
-        if self.resolveOobi(alias=aid['alias'], oobi=aid['oobi']):
-            res = requests.get(aid['oobi'])
-            kel = res.text
-            store_kel(prefix, kel)
+        if aid:
+            if not aid['cardano']:
+                self.resolveOobi(alias=aid['alias'], oobi=aid['oobi'])
+            return get_kel(prefix)
+        else:
+            return []
             
-            # print(kel)
-            # ims=bytearray(kel, encoding='utf8')
-            # cold = sniff(ims=ims)
-            # print(cold)
-            # serdery = serdering.Serdery(version=Version)
-            # serder = serdery.reap(ims=ims)
-            # print(isinstance(serder, serdering.SerderKERI))
-            # print(serder.ked)
-            # cold = sniff(ims=ims)
-            # print(cold)
-            # ctr = yield from Parser()._extractor(ims=ims, klas=Counter, cold=cold)
-            # print(ctr.code)
+        
+    def parseMsg(self, msg):
+        hby = existing.setupHby(name='watcher', bran=self.bran)
+        kvy = Kevery(db=hby.db, lax=True, local=False)
+        parser = Parser(framed=True, kvy=kvy)
+        parser.parse(ims=bytearray(msg, encoding='utf8'))
 
-            return kel
+        serdery = serdering.Serdery(version=Version)
+        try:
+            serder = serdery.reap(ims=bytearray(msg, encoding='utf8'))
+            if not get_aid(serder.pre):
+                aid = {
+                    "prefix": serder.pre,
+                    "alias": serder.pre,
+                    "cardano": True,
+                    "watched": True,
+                    'oobi': 'NA'
+                }
+                store_aid(aid)
+                print("New AID discovered on Cardano", serder.pre)
+
+            cloner = hby.db.clonePreIter(pre=serder.pre, fn=0)  # create iterator at 0
+            for msg in cloner:
+                srdr = serdering.SerderKERI(raw=msg)
+                store_kel(serder.pre, srdr.sn, msg.decode("utf-8"))
+
+        except Exception as e:
+            print(e)
+        hby.close()
+
+    def printPre(self, prefix):
+        hby = existing.setupHby(name='watcher', bran=self.bran)
+
+        kever = hby.kevers[prefix]
+        ser = kever.serder
+        print("{}: {}".format('AID', prefix))
+        print("Seq No:\t{}".format(kever.sner.num))
+        cloner = hby.db.clonePreIter(pre=prefix, fn=0)  # create iterator at 0
+        for msg in cloner:
+            print(msg)
+            # srdr = serdering.SerderKERI(raw=msg)
+            # print(srdr.pretty())
+            print()
+        hby.close()
+
             
 
 
@@ -230,6 +242,8 @@ if __name__ == "__main__":
     agent.initWallet()
     # res = agent.resolveOobi(oobiAlias="dev01",oobi='https://witness-dev01.rootsid.cloud/oobi/BHI7yViNOGWd1X0aKMgxLm4dUgbQDYoCFSJM2U8Hb3cx/controller')
     # print(res)
-    agent.queryAID('EF3V0uUvP3o4awSSNqJ9wUpG_BdamZgr9S9K_GLNWDZ9')
+    # agent.queryAID('EF3V0uUvP3o4awSSNqJ9wUpG_BdamZgr9S9K_GLNWDZ9')
+    # agent.printPre('EC12CJHxS0Dys74Uko2vFUMxXULPx3WcLoIIQzOFsnMH')
+    agent.printPre('EF3V0uUvP3o4awSSNqJ9wUpG_BdamZgr9S9K_GLNWDZ9')
 
 

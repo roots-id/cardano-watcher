@@ -14,23 +14,9 @@ METADATA_LABEL = int(''.join([str(ord(char) - 96) for char in 'KERIWATCHER'.lowe
 
 
 
-class WitnessPoller(threading.Thread):
+class Poller(threading.Thread):
     def __init__(self, agent: Agent):
         self.agent = agent
-        threading.Thread.__init__(self)
-
-    def run(self):
-        print("Witness Poller is up")
-        while True:
-            print("Witness polling loop started...")
-            aids = list_aids()
-            for aid in aids:
-                print("Watching", aid['prefix'])
-                self.agent.watchAID(prefix=aid['prefix'])
-            time.sleep(30)
-
-class CardanoPoller(threading.Thread):
-    def __init__(self, agent: Agent):
         self.api = BlockFrostApi(
             project_id=BLOCKFROST_PROJECT_ID,
             base_url=ApiUrls.preview.value
@@ -38,10 +24,22 @@ class CardanoPoller(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-        print("Cardano Poller is up")
+        print("Witness Poller is up")
         while True:
-            print("Cardano polling loop started...")
+            # AIDs POLLER
+            print("Polling AIDs")
+            aids = list_aids()
+            for aid in aids:
+                if aid['watched'] and not aid['cardano']:
+                    self.agent.resolveOobi(alias=aid['alias'], oobi=aid['oobi'])
+            
+            # CARDANO POLLER
+            print("Crawling Cardano Blockchain")
+            # todo pagination
             metadatas = self.api.metadata_label_json(METADATA_LABEL)
             for meta in metadatas:
-                print(''.join(meta.json_metadata))
-            time.sleep(70)
+                msg = ''.join(meta.json_metadata)
+                self.agent.parseMsg(msg)
+                break
+            time.sleep(30)
+

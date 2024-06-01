@@ -32,16 +32,19 @@ def list_witnesses():
 def store_witness(wit):
     db.wits.replace_one({"prefix": wit['prefix']}, wit, upsert=True)
 
-def store_kel(prefix, kel):
-    current_kel = db.kels.find({"prefix": prefix}).sort([('timestamp', -1)]).limit(1)
+def store_kel(prefix, sn, kel):
+    current_kel = db.kels.find({"prefix": prefix, 'sn':sn}).sort([('timestamp', -1)]).limit(1)
     try:
-        if len(kel) != len(current_kel[0]['kel']):
-            db.kels.insert_one({"prefix": prefix, "kel": kel, "timestamp": datetime.datetime.now()})
-            print("KEL updated for aid ", prefix)
+        if kel != current_kel[0]['kel']:
+            db.kels.insert_one({"prefix": prefix, "sn":sn, "kel": kel, "timestamp": datetime.datetime.now()})
+            print("KEL updated for aid", prefix, "sn ", sn)
         else:
-            print("KEL without changes for ", prefix)
+            print("KEL without changes for", prefix, "sn ", sn)
     except IndexError:
-        db.kels.insert_one({"prefix": prefix, "kel": kel, "timestamp": datetime.datetime.now()})
-        print("KEL added for aid ", prefix)
+        db.kels.insert_one({"prefix": prefix, "sn": sn, "kel": kel, "timestamp": datetime.datetime.now()})
+        print("KEL added for aid", prefix, "sn ", sn)
+
+def get_kel(prefix):
+    return list(db.kels.find({"prefix": prefix},{'_id': 0}).sort([('timestamp', -1)]))
 
 
