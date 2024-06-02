@@ -1,11 +1,12 @@
 """Witness Poller"""
 import threading
 import time
-from store import list_aids
+from store import list_aids, list_witnesses, store_witness_status
 from agent import Agent
 import os
 from blockfrost import BlockFrostApi, ApiError, ApiUrls
 from pycardano import * 
+import requests
 
 
 NETWORK = Network.TESTNET
@@ -35,10 +36,19 @@ class Poller(threading.Thread):
             
             # CARDANO POLLER
             print("Crawling Cardano Blockchain")
-            # todo pagination
+            # TODO pagination
             metadatas = self.api.metadata_label_json(METADATA_LABEL)
             for meta in metadatas:
                 msg = ''.join(meta.json_metadata)
                 self.agent.parseMsg(msg)
+
+            # WITNESS POLLER
+            print("Polling Witnesses")
+            witnesses = list_witnesses()
+            for wit in witnesses:
+                ping = requests.get(wit['oobi'])
+                store_witness_status(wit['prefix'], ping.status_code)
+
+
             time.sleep(30)
 

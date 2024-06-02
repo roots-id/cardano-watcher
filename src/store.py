@@ -32,6 +32,9 @@ def list_witnesses():
 def store_witness(wit):
     db.wits.replace_one({"prefix": wit['prefix']}, wit, upsert=True)
 
+def store_witness_status(prefix, status):
+    db.wit_pings.insert_one({"prefix": prefix, "status":status, "timestamp": datetime.datetime.now()})
+
 def store_kel(prefix, sn, kel):
     current_kel = db.kels.find({"prefix": prefix, 'sn':sn}).sort([('timestamp', -1)]).limit(1)
     try:
