@@ -46,9 +46,9 @@ class Poller(threading.Thread):
             print("Polling Witnesses")
             witnesses = list_witnesses()
             for wit in witnesses:
-                ping = requests.get(wit['oobi'])
-                store_witness_status(wit['prefix'], ping.status_code)
-
+                if wit['oobi'] != 'NA':
+                    ping = requests.get(wit['oobi'])
+                    store_witness_status(wit['prefix'], ping.status_code)
 
             time.sleep(30)
 

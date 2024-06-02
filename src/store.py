@@ -3,6 +3,8 @@ from bson.objectid import ObjectId
 import datetime
 import os
 import urllib.parse
+from keri.core import serdering
+
 
 mongo = MongoClient(
     # os.environ["DB_URL"],
@@ -41,11 +43,30 @@ def store_kel(prefix, sn, kel):
         if kel != current_kel[0]['kel']:
             db.kels.insert_one({"prefix": prefix, "sn":sn, "kel": kel, "timestamp": datetime.datetime.now()})
             print("KEL updated for aid", prefix, "sn ", sn)
+            check_new_witnesses(kel)
     except IndexError:
         db.kels.insert_one({"prefix": prefix, "sn": sn, "kel": kel, "timestamp": datetime.datetime.now()})
         print("KEL added for aid", prefix, "sn ", sn)
+        check_new_witnesses(kel)
 
 def get_kel(prefix):
     return list(db.kels.find({"prefix": prefix},{'_id': 0}).sort([('timestamp', -1)]))
+
+def check_new_witnesses(msg):
+    serder = serdering.SerderKERI(raw=bytearray(msg, encoding='utf8'))
+    witnesses = list_witnesses()
+    wits = [witnesses['prefix'] for witnesses in witnesses]
+    if serder and serder.backs:
+        for wit_prefix in serder.backs:
+            if wit_prefix not in wits:
+                wit = {
+                    "prefix": wit_prefix,
+                    "alias": wit_prefix,
+                    "oobi": "NA",
+                    "provider": "NA",
+                    "referral": serder.pre
+                }
+                store_witness(wit)
+                print("New Witness discovered", wit_prefix)
 
 

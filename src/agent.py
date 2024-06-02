@@ -12,14 +12,12 @@ from keri.db import basing
 from keri.help import helping
 import datetime
 from keri.app.cli.common import displaying
-from keri.db import dbing
 from keri.core.eventing import Siger, Kevery
 from keri.core.parsing import Parser
 from keri.core import serdering
 from keri.kering import sniff, Version
 from keri.core.coring import Counter
 from store import get_aid, store_aid, store_kel, get_kel
-import requests
 
 class Agent:
     def __init__(self, name, bran):
