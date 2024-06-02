@@ -37,6 +37,7 @@ class Witness(BaseModel):
     prefix: str
     oobi: str
     provider: str
+    referral: str
 
 origins = ["*"]
 app.add_middleware(
