@@ -38,8 +38,6 @@ def store_kel(prefix, sn, kel):
         if kel != current_kel[0]['kel']:
             db.kels.insert_one({"prefix": prefix, "sn":sn, "kel": kel, "timestamp": datetime.datetime.now()})
             print("KEL updated for aid", prefix, "sn ", sn)
-        else:
-            print("KEL without changes for", prefix, "sn ", sn)
     except IndexError:
         db.kels.insert_one({"prefix": prefix, "sn": sn, "kel": kel, "timestamp": datetime.datetime.now()})
         print("KEL added for aid", prefix, "sn ", sn)

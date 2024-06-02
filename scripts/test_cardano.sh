@@ -6,3 +6,8 @@
 # A Blockfrost API key in env BLOCKFROST_API_KEY
 # Fund your cardano address (https://docs.cardano.org/cardano-testnet/tools/faucet)
 
+
+python cardano_agent.py init cardano
+python cardano_agent.py incept cardano aid1
+
+python cardano_agent.py rotate cardano aid1

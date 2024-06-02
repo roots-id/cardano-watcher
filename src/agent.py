@@ -1,4 +1,3 @@
-from hio import help
 from hio.base import doing
 
 from keri.app import directing
@@ -19,57 +18,51 @@ from keri.core.parsing import Parser
 from keri.core import serdering
 from keri.kering import sniff, Version
 from keri.core.coring import Counter
-
 from store import get_aid, store_aid, store_kel, get_kel
 import requests
-
-
 
 class Agent:
     def __init__(self, name, bran):
         self.bran = bran
         self.name = name
+        self.hby = None
 
     def initWallet(self):
         kwa = dict()
         kwa["bran"] = self.bran
-        hby = habbing.Habery(name=self.name, **kwa)
-        rgy = credentialing.Regery(hby=hby, name=self.name)
+        self.hby = habbing.Habery(name=self.name, **kwa)
+        rgy = credentialing.Regery(hby=self.hby, name=self.name)
 
-        print("KERI Keystore created at:", hby.ks.path)
-        print("KERI Database created at:", hby.db.path)
+        print("KERI Keystore created at:", self.hby.ks.path)
+        print("KERI Database created at:", self.hby.db.path)
         print("KERI Credential Store created at:", rgy.reger.path)
         try:
-            hab = hby.makeHab(name=self.name)
+            hab = self.hby.makeHab(name=self.name)
         except:
-            hab = hby.habByName(self.name)
+            hab = self.hby.habByName(self.name)
         print(f'Watcher AID {hab.pre}')
-        hby.close()
 
     def resolveOobi(self, alias, oobi):
-        doers = [OobiDoer(name=self.name, oobi=oobi, oobiAlias=alias, bran=self.bran)]
+        doers = [OobiDoer(name=self.name, oobi=oobi, oobiAlias=alias, hby = self.hby)]
         directing.runController(doers=doers, expire=5.0)
-        hby = existing.setupHby(name='watcher', bran=self.bran)
-        obr = hby.db.roobi.get(keys=(oobi,))
+        obr = self.hby.db.roobi.get(keys=(oobi,))
         if obr:
             prefix = obr.cid
-            kever = hby.kevers[prefix]
+            kever = self.hby.kevers[prefix]
             # ser = kever.serder
             # print("{}: {}".format('AID', prefix))
             # print("Seq No:\t{}".format(kever.sner.num))
-            cloner = hby.db.clonePreIter(pre=prefix, fn=0)  # create iterator at 0
+            cloner = self.hby.db.clonePreIter(pre=prefix, fn=0)  # create iterator at 0
             for msg in cloner:
                 srdr = serdering.SerderKERI(raw=msg)
                 # print(srdr.pretty())
                 store_kel(prefix, srdr.sn, msg.decode("utf-8"))
-            hby.close()
             return prefix
         else:
-            hby.close()
             return None
         
     # def queryAID(self, prefix):
-    #     # doers = [QueryDoer(name=self.name, alias=self.name,bran=self.bran, pre=prefix)]
+    #     # doers = [QueryDoer(name=self.name, alias=self.name,hby=self.hby, pre=prefix)]
     #     # directing.runController(doers=doers, expire=0.0)
     #     hby = existing.setupHby(name='watcher', bran=self.bran)
     #     kever = hby.kevers[prefix]
@@ -79,7 +72,6 @@ class Agent:
     #     dgkey = dbing.dgKey(ser.preb, kever.lastEst.d)
     #     anchor = hby.db.getAes(dgkey)
     #     hby.db.getEvt
-
     #     print(kever.state())
     #     print(kever.serder.ked)
 
@@ -93,11 +85,9 @@ class Agent:
             return get_kel(prefix)
         else:
             return []
-            
         
     def parseMsg(self, msg):
-        hby = existing.setupHby(name='watcher', bran=self.bran)
-        kvy = Kevery(db=hby.db, lax=True, local=False)
+        kvy = Kevery(db=self.hby.db, lax=True, local=False)
         parser = Parser(framed=True, kvy=kvy)
         parser.parse(ims=bytearray(msg, encoding='utf8'))
 
@@ -115,41 +105,34 @@ class Agent:
                 store_aid(aid)
                 print("New AID discovered on Cardano", serder.pre)
 
-            cloner = hby.db.clonePreIter(pre=serder.pre, fn=0)  # create iterator at 0
+            cloner = self.hby.db.clonePreIter(pre=serder.pre, fn=0)  # create iterator at 0
             for msg in cloner:
                 srdr = serdering.SerderKERI(raw=msg)
                 store_kel(serder.pre, srdr.sn, msg.decode("utf-8"))
 
         except Exception as e:
             print(e)
-        hby.close()
 
     def printPre(self, prefix):
-        hby = existing.setupHby(name='watcher', bran=self.bran)
-
-        kever = hby.kevers[prefix]
+        kever = self.hby.kevers[prefix]
         ser = kever.serder
         print("{}: {}".format('AID', prefix))
         print("Seq No:\t{}".format(kever.sner.num))
-        cloner = hby.db.clonePreIter(pre=prefix, fn=0)  # create iterator at 0
+        cloner = self.hby.db.clonePreIter(pre=prefix, fn=0)  # create iterator at 0
         for msg in cloner:
             print(msg)
             # srdr = serdering.SerderKERI(raw=msg)
             # print(srdr.pretty())
             print()
-        hby.close()
-
-            
-
 
 class OobiDoer(doing.DoDoer):
     """ DoDoer for loading oobis and waiting for the results """
 
-    def __init__(self, name, oobi, oobiAlias, bran):
+    def __init__(self, name, oobi, oobiAlias, hby):
 
         self.processed = 0
         self.oobi = oobi
-        self.hby = existing.setupHby(name=name, bran=bran)
+        self.hby = hby
         self.hbyDoer = habbing.HaberyDoer(habery=self.hby)
 
         obr = basing.OobiRecord(date=helping.nowIso8601())
@@ -193,14 +176,13 @@ class OobiDoer(doing.DoDoer):
 
 class QueryDoer(doing.DoDoer):
 
-    def __init__(self, name, alias, bran, pre, **kwa):
+    def __init__(self, name, alias, hby, pre, **kwa):
         doers = []
-        self.hby = existing.setupHby(name=name, bran=bran)
+        self.hby = hby
         self.hbyDoer = habbing.HaberyDoer(habery=self.hby)  # setup doer
         hab = self.hby.habByName(alias)
 
         self.hab = hab
-
         self.pre = pre
         # self.anchor = anchor
 
@@ -245,5 +227,3 @@ if __name__ == "__main__":
     # agent.queryAID('EF3V0uUvP3o4awSSNqJ9wUpG_BdamZgr9S9K_GLNWDZ9')
     # agent.printPre('EC12CJHxS0Dys74Uko2vFUMxXULPx3WcLoIIQzOFsnMH')
     agent.printPre('EF3V0uUvP3o4awSSNqJ9wUpG_BdamZgr9S9K_GLNWDZ9')
-
-

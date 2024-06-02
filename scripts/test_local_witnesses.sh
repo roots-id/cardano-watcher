@@ -17,10 +17,10 @@ curl localhost:8000/witnesses
 echo; read -rsn1 -p "Press any key continue..."; echo
 
 printf "%s " "Init and incept an AID with witnesses"; echo
-kli init --name local1  --nopasscode --salt 0AAWO5C0o5sRN8z71RRcp0iQ
+kli init --name local1  --nopasscode --salt 0AC-Vc0dyoUz5xOzqLXf1Zv1
 kli oobi resolve --name local1 --oobi http://127.0.0.1:5642/oobi/BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha/controller --oobi-alias dev01
 kli oobi resolve --name local1 --oobi http://127.0.0.1:5643/oobi/BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM/controller --oobi-alias dev02
-kli incept --name local1 --alias aid1 -w BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha -w BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM  --toad 2 --icount 1 --isith 1 --ncount 1 --nsith 1 --transferable
+kli incept --name local1 --alias aiddemo -w BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha -w BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM  --toad 2 --icount 1 --isith 1 --ncount 1 --nsith 1 --transferable
 
 echo; read -rsn1 -p "Press any key continue..."; echo
 
