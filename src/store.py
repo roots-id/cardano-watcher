@@ -24,6 +24,13 @@ def list_aids():
 def store_aid(aid):
     db.aids.replace_one({"prefix": aid['prefix']}, aid, upsert=True)
 
+def remove_aid(prefix):
+    delete_result = db.aids.delete_one({"prefix": prefix})
+    if delete_result.deleted_count == 1:
+        return True
+    else:
+        return False
+
 def get_aid(prefix):
     return db.aids.find_one({"prefix": prefix},{'_id': 0})
 
@@ -33,6 +40,13 @@ def list_witnesses():
 
 def store_witness(wit):
     db.wits.replace_one({"prefix": wit['prefix']}, wit, upsert=True)
+
+def remove_witness(prefix):
+    delete_result = db.wits.delete_one({"prefix": prefix})
+    if delete_result.deleted_count == 1:
+        return True
+    else:
+        return False
 
 def store_witness_status(prefix, status):
     db.wit_pings.insert_one({"prefix": prefix, "status":status, "timestamp": datetime.datetime.now()})

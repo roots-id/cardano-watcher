@@ -14,7 +14,6 @@ BLOCKFROST_PROJECT_ID = os.environ['BLOCKFROST_API_KEY']
 METADATA_LABEL = int(''.join([str(ord(char) - 96) for char in 'KERIWATCHER'.lower()]))
 
 
-
 class Poller(threading.Thread):
     def __init__(self, agent: Agent):
         self.agent = agent
@@ -39,7 +38,7 @@ class Poller(threading.Thread):
             page = 1
             while True:
                 try:
-                    metadatas = self.api.metadata_label_json(METADATA_LABEL, gather_pages=False, count=5, page=page)
+                    metadatas = self.api.metadata_label_json(METADATA_LABEL, gather_pages=False, count=100, page=page)
                 except ApiError:
                     break
                 for meta in metadatas:
