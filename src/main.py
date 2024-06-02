@@ -4,7 +4,7 @@ from fastapi import Request, FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response, RedirectResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness
+from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness, generate_stats
 from agent import Agent
 from contextlib import asynccontextmanager
 from poller import Poller
@@ -100,6 +100,10 @@ def add_witness(wit: Witness):
     except Exception as e:
         print("Error: ", e)
         return HTTPException(status_code=400, detail="Bad Request")
+    
+@app.get("/stats")
+def get_stats():
+    return generate_stats()
 
 @app.get("/")
 def index():

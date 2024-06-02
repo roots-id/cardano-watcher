@@ -83,4 +83,14 @@ def check_new_witnesses(msg):
                 store_witness(wit)
                 print("New Witness discovered", wit_prefix)
 
+def generate_stats():
+    return {
+        "aids": db.aids.count_documents({}),
+        "cardanoAids": db.aids.count_documents({"cardano": True}),
+        "witnesses": db.wits.count_documents({}),
+        "keyEventsTotal": db.kels.count_documents({}),
+        "keyEventsMean": db.kels.count_documents({}) / db.aids.count_documents({}),
+        "witnessesAvailability": db.wit_pings.count_documents({"status": 200}) / db.wit_pings.count_documents({})
+    }
+
 
