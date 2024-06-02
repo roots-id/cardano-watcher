@@ -36,11 +36,16 @@ class Poller(threading.Thread):
             
             # CARDANO POLLER
             print("Crawling Cardano Blockchain")
-            # TODO pagination
-            metadatas = self.api.metadata_label_json(METADATA_LABEL)
-            for meta in metadatas:
-                msg = ''.join(meta.json_metadata)
-                self.agent.parseMsg(msg)
+            page = 1
+            while True:
+                try:
+                    metadatas = self.api.metadata_label_json(METADATA_LABEL, gather_pages=False, count=5, page=page)
+                except ApiError:
+                    break
+                for meta in metadatas:
+                    msg = ''.join(meta.json_metadata)
+                    self.agent.parseMsg(msg)
+                page += 1
 
             # WITNESS POLLER
             print("Polling Witnesses")
