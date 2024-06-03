@@ -91,4 +91,10 @@ def generate_stats():
         "witnessesAvailability": db.wit_pings.count_documents({"status": 200}) / db.wit_pings.count_documents({})
     }
 
+def get_users():
+    return list(db.users.find({},{'_id': 0}))
+
+def get_user(prefix):
+    return db.users.find_one({'prefix': prefix},{'_id': 0})
+
 

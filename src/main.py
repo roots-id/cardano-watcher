@@ -3,7 +3,7 @@ from fastapi import Request, FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response, RedirectResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness, generate_stats
+from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness, generate_stats, get_user
 from agent import Agent
 from contextlib import asynccontextmanager
 from poller import Poller
@@ -17,11 +17,11 @@ async def lifespan(app: FastAPI):
     Poller(agent=app.state.agent).start()
     yield
 
-
 app = FastAPI(lifespan=lifespan)
 SERVER_IP = "0.0.0.0"
 SERVER_PORT = 8000
 WATCHER_BRAN = os.environ["WATCHER_BRAN"] if "WATCHER_BRAN" in os.environ else None
+SIGNED_HEADERS_VERIFICATION = False
 
 class AID(BaseModel):
     alias: str
@@ -56,14 +56,18 @@ async def get_kel(prefix: str):
     return app.state.agent.watchAID(prefix=prefix)
 
 @app.delete("/aids/{prefix}")
-async def delete_aid(prefix: str):
+async def delete_aid(prefix: str, request: Request):
+    if SIGNED_HEADERS_VERIFICATION and (not get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
+        return HTTPException(status_code=401, detail="Unauthorized")
     if remove_aid(prefix):
         return Response(status_code=200)
     else:
         return HTTPException(status_code=404, detail="AID Not Found")
 
 @app.post("/aids")
-def add_aid(aid: AID):
+def add_aid(aid: AID, request: Request):
+    if SIGNED_HEADERS_VERIFICATION and (not get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
+        return HTTPException(status_code=401, detail="Unauthorized")
     try:
         if pre := app.state.agent.resolveOobi(alias=aid.alias,oobi=aid.oobi):
             aid.prefix = pre
@@ -80,18 +84,23 @@ def get_witnesses():
     return list_witnesses()
 
 @app.delete("/witnesses/{prefix}")
-async def delete_witness(prefix: str):
+async def delete_witness(prefix: str, request: Request):
+    if SIGNED_HEADERS_VERIFICATION and (not get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
+        return HTTPException(status_code=401, detail="Unauthorized")
     if remove_witness(prefix):
         return Response(status_code=200)
     else:
         return HTTPException(status_code=404, detail="Witness Not Found")
 
 @app.post("/witnesses")
-def add_witness(wit: Witness):
+def add_witness(wit: Witness, request: Request):
+    if SIGNED_HEADERS_VERIFICATION and (not get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
+        return HTTPException(status_code=401, detail="Unauthorized")
     try:
         if pre := app.state.agent.resolveOobi(alias=wit.alias,oobi=wit.oobi):
             wit.prefix = pre
             store_witness(wit.model_dump())
+            app.state.agent.createAidForWitness(prefix=pre)
             return Response(status_code=200)
         else:
             return HTTPException(status_code=404, detail="OOBI Not Found")

@@ -12,6 +12,7 @@ import requests
 NETWORK = Network.TESTNET
 BLOCKFROST_PROJECT_ID = os.environ['BLOCKFROST_API_KEY']
 METADATA_LABEL = int(''.join([str(ord(char) - 96) for char in 'KERIWATCHER'.lower()]))
+POLLING_DELAY = 30 # seconds
 
 
 class Poller(threading.Thread):
@@ -54,5 +55,5 @@ class Poller(threading.Thread):
                     ping = requests.get(wit['oobi'])
                     store_witness_status(wit['prefix'], ping.status_code)
 
-            time.sleep(30)
+            time.sleep(POLLING_DELAY)
 

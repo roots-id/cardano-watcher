@@ -17,6 +17,8 @@ from keri.core.parsing import Parser
 from keri.core import serdering
 from keri.kering import sniff, Version
 from keri.core.coring import Counter
+from keri.end import ending
+
 from store import get_aid, store_aid, store_kel, get_kel
 
 class Agent:
@@ -40,6 +42,10 @@ class Agent:
             hab = self.hby.habByName(self.name)
         print(f'Watcher AID {hab.pre}')
 
+    def createAidForWitness(self, witness_pre):
+        hab = self.hby.makeHab(name='for-witness-' + witness_pre, transferable=True, icount=1, ncount=1,isith=1,nsith=1, toad=1, wits=[witness_pre])
+        return hab.pre
+
     def resolveOobi(self, alias, oobi):
         doers = [OobiDoer(name=self.name, oobi=oobi, oobiAlias=alias, hby = self.hby)]
         directing.runController(doers=doers, expire=5.0)
@@ -47,33 +53,24 @@ class Agent:
         if obr:
             prefix = obr.cid
             kever = self.hby.kevers[prefix]
-            # ser = kever.serder
-            # print("{}: {}".format('AID', prefix))
-            # print("Seq No:\t{}".format(kever.sner.num))
             cloner = self.hby.db.clonePreIter(pre=prefix, fn=0)  # create iterator at 0
             for msg in cloner:
                 srdr = serdering.SerderKERI(raw=msg)
-                # print(srdr.pretty())
                 store_kel(prefix, srdr.sn, msg.decode("utf-8"))
             return prefix
         else:
             return None
         
-    # def queryAID(self, prefix):
-    #     # doers = [QueryDoer(name=self.name, alias=self.name,hby=self.hby, pre=prefix)]
-    #     # directing.runController(doers=doers, expire=0.0)
-    #     hby = existing.setupHby(name='watcher', bran=self.bran)
-    #     kever = hby.kevers[prefix]
-    #     ser = kever.serder
-    #     dgkey = dbing.dgKey(ser.preb, ser.saidb)
-    #     wigs = hby.db.getWigs(dgkey)
-    #     dgkey = dbing.dgKey(ser.preb, kever.lastEst.d)
-    #     anchor = hby.db.getAes(dgkey)
-    #     hby.db.getEvt
-    #     print(kever.state())
-    #     print(kever.serder.ked)
+    def queryAID(self, prefix):
+        aid = get_aid(prefix)
+        kever = self.hby.kevers[aid['prefix']]
+        wits = kever.wits
+        # TODO search for a known witness
+        alias = 'for-witness-' + wits[0]
+        doers = [QueryDoer(name=self.name, alias=alias,hby=self.hby, pre=prefix)]
+        directing.runController(doers=doers, expire=0.0)
 
-    #     return 
+        return 
         
     def watchAID(self, prefix):
         aid = get_aid(prefix)
@@ -119,9 +116,83 @@ class Agent:
         cloner = self.hby.db.clonePreIter(pre=prefix, fn=0)  # create iterator at 0
         for msg in cloner:
             print(msg)
-            # srdr = serdering.SerderKERI(raw=msg)
-            # print(srdr.pretty())
+            srdr = serdering.SerderKERI(raw=msg)
+            print(srdr.pretty())
             print()
+
+    def verifyHeaders(self, request):
+        headers = request.headers
+        if "SIGNATURE-INPUT" not in headers or "SIGNATURE" not in headers:
+            return False
+
+        siginput = headers["SIGNATURE-INPUT"]
+        if not siginput:
+            return False
+        signature = headers["SIGNATURE"]
+        if not signature:
+            return False
+        
+        resource = headers["Signify-Resource"]
+        if not resource:
+            return False
+
+        inputs = ending.desiginput(siginput.encode("utf-8"))
+        inputs = [i for i in inputs if i.name == "signify"]
+
+        if not inputs:
+            return False
+
+        for inputage in inputs:
+            items = []
+            for field in inputage.fields:
+                if field.startswith("@"):
+                    if field == "@method":
+                        items.append(f'"{field}": {request.method}')
+                    elif field == "@path":
+                        items.append(f'"{field}": {request.url.path}')
+
+                else:
+                    key = field.upper()
+                    field = field.lower()
+                    if key not in headers:
+                        continue
+
+                    value = ending.normalize(headers[key])
+                    items.append(f'"{field}": {value}')
+
+            values = [f"({' '.join(inputage.fields)})", f"created={inputage.created}"]
+            if inputage.expires is not None:
+                values.append(f"expires={inputage.expires}")
+            if inputage.nonce is not None:
+                values.append(f"nonce={inputage.nonce}")
+            if inputage.keyid is not None:
+                values.append(f"keyid={inputage.keyid}")
+            if inputage.context is not None:
+                values.append(f"context={inputage.context}")
+            if inputage.alg is not None:
+                values.append(f"alg={inputage.alg}")
+
+            params = ';'.join(values)
+
+            items.append(f'"@signature-params: {params}"')
+            ser = "\n".join(items).encode("utf-8")
+
+            # resource = self.resource(request)
+            # agent = self.agency.get(resource)
+
+            # if agent is None:
+            #     raise kering.AuthNError("unknown or invalid controller")
+
+            # if resource not in agent.agentHab.kevers:
+            #     raise kering.AuthNError("unknown or invalid controller")
+
+            ckever = kever = self.hby.kevers[resource]
+            signages = ending.designature(signature)
+            cig = signages[0].markers[inputage.name]
+            if not ckever.verfers[0].verify(sig=cig.raw, ser=ser):
+                return False
+
+        return True
 
 class OobiDoer(doing.DoDoer):
     """ DoDoer for loading oobis and waiting for the results """
@@ -174,7 +245,7 @@ class OobiDoer(doing.DoDoer):
 
 class QueryDoer(doing.DoDoer):
 
-    def __init__(self, name, alias, hby, pre, **kwa):
+    def __init__(self, alias, hby, pre, **kwa):
         doers = []
         self.hby = hby
         self.hbyDoer = habbing.HaberyDoer(habery=self.hby)  # setup doer
