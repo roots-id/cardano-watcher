@@ -3,7 +3,7 @@ from fastapi import Request, FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response, RedirectResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness, generate_stats, get_user
+from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness, generate_stats, get_user, get_users
 from agent import Agent
 from contextlib import asynccontextmanager
 from poller import Poller
@@ -15,13 +15,15 @@ async def lifespan(app: FastAPI):
     app.state.agent = Agent(name='watcher', bran=WATCHER_BRAN)
     app.state.agent.initWallet()
     Poller(agent=app.state.agent).start()
+    for user in get_users():
+        app.state.agent.resolveOobi(alias = user["name"], oobi=user["oobi"])
     yield
 
 app = FastAPI(lifespan=lifespan)
 SERVER_IP = "0.0.0.0"
 SERVER_PORT = 8000
 WATCHER_BRAN = os.environ["WATCHER_BRAN"] if "WATCHER_BRAN" in os.environ else None
-SIGNED_HEADERS_VERIFICATION = False
+SIGNED_HEADERS_VERIFICATION = os.environ["SIGNED_HEADERS_VERIFICATION"] if "SIGNED_HEADERS_VERIFICATION" in os.environ else False
 
 class AID(BaseModel):
     alias: str
