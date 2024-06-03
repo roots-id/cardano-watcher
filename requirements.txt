@@ -1,6 +1,6 @@
 pymongo>=4.7.2
 fastapi>=0.111.0
 uvicorn>=0.29.0
-blockfrost-python
-pycardano
-textwrap
+blockfrost-python>=0.5.3
+pycardano>=0.10.0
+

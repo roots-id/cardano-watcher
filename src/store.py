@@ -7,9 +7,7 @@ from keri.core import serdering
 
 
 mongo = MongoClient(
-    # os.environ["DB_URL"],
-    host='localhost',
-    port=27017,
+    host= os.environ["DB_URL"] if "DB_URL" in os.environ else 'mongodb://localhost:27017',
     username=urllib.parse.quote_plus(os.environ["MONGODB_USER"]) if "MONGODB_USER" in os.environ else None,
     password=urllib.parse.quote_plus(os.environ["MONGODB_PASSWORD"]) if "MONGODB_PASSWORD" in os.environ else None,
     authSource="admin"

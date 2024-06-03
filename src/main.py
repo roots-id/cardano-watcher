@@ -1,4 +1,3 @@
-import datetime
 import uvicorn
 from fastapi import Request, FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response, RedirectResponse, HTMLResponse
@@ -8,13 +7,12 @@ from store import list_aids, store_aid, list_witnesses, store_witness, remove_ai
 from agent import Agent
 from contextlib import asynccontextmanager
 from poller import Poller
-
 import os
-import json
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.agent = Agent(name='watcher', bran='HCJhWE8E9DTP69BI1Kdk1')
+    app.state.agent = Agent(name='watcher', bran=WATCHER_BRAN)
     app.state.agent.initWallet()
     Poller(agent=app.state.agent).start()
     yield
@@ -23,7 +21,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 SERVER_IP = "0.0.0.0"
 SERVER_PORT = 8000
-PUBLIC_URL = os.environ["PUBLIC_URL"] if "PUBLIC_URL" in os.environ else "http://127.0.0.1:8000"
+WATCHER_BRAN = os.environ["WATCHER_BRAN"] if "WATCHER_BRAN" in os.environ else None
 
 class AID(BaseModel):
     alias: str
@@ -107,11 +105,7 @@ def get_stats():
 
 @app.get("/")
 def index():
-    # with open('web/index.html') as f:
-    #     html_content = f.read()
-    # return HTMLResponse(content=html_content, status_code=200)
     return {"message": "Watcher API active"}
-
 
 if __name__ == "__main__":
     

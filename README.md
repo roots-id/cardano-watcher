@@ -20,3 +20,25 @@ In this case we are developing a **Cardano Watcher** that is primarily focused o
 * [Design](DESIGN.md)
 * [Project Plan](https://github.com/roots-id/cardano-watcher/milestones) and followup
 * [License](LICENSE): Apache License 2.0
+
+## Getting started
+This project consists of a backend app developed in Python and a frontend app developed in React.
+
+### Backend
+- Install dependencies `pip install -r requirements.txt`
+- This implementation depends on [Blockfrost](https://blockfrost.io) to interact to cardano. In order to use this implementation and run the demos you need to create an account, create a project and get an API KEY. For demo purposes you can create one project on a Free Tier and use a testnet network such as `Preview`.
+- The system uses [MongoDB](https://www.mongodb.com) as NoSQL DataBase. One installaton option is with docker image as:
+```
+docker pull mongo
+docker run --name mongo_example -d mongo
+```
+- Export environment variables
+  -  `export BLOCKFROST_API_KEY={ BLOCKFROST_API_KEY }`
+  -  `export DB_URL={ DB_URL }` default to `mongodb://localhost:27017/`
+  -  `export MONGODB_USER={ MONGODB_USER }` default to None
+  -  `export MONGODB_PASSWORD={ MONGODB_PASSWORD }` default to None
+  -  `export WATCHER_BRAN={ WATCHER_BRAN }` default to None
+-  Run the backend app `python app.py` or with `gunicorn app:app`
+-  
+
+### Frontend
