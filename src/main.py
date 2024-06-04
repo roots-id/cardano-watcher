@@ -3,7 +3,7 @@ from fastapi import Request, FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response, RedirectResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness, generate_stats, get_user, get_users
+from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness, generate_stats, get_user, get_users, get_aid
 from agent import Agent
 from contextlib import asynccontextmanager
 from poller import Poller
@@ -16,7 +16,16 @@ async def lifespan(app: FastAPI):
     app.state.agent.initWallet()
     Poller(agent=app.state.agent).start()
     for user in get_users():
-        app.state.agent.resolveOobi(alias = user["name"], oobi=user["oobi"])
+        if get_aid(user['prefix']) is None:
+            if pre := app.state.agent.resolveOobi(alias = user["name"], oobi=user["oobi"]):
+                aid = AID(alias=user["name"], 
+                          prefix=pre, 
+                          oobi=user["oobi"], 
+                          watched=True, 
+                          cardano=False)
+                aid.prefix = pre
+                store_aid(aid.model_dump())
+            
     yield
 
 app = FastAPI(lifespan=lifespan)
