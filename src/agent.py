@@ -19,13 +19,14 @@ from keri.kering import sniff, Version
 from keri.core.coring import Counter
 from keri.end import ending
 
-from store import get_aid, store_aid, store_kel, get_kel
+from store import Store
 
 class Agent:
-    def __init__(self, name, bran):
+    def __init__(self, name, bran, store: Store):
         self.bran = bran
         self.name = name
         self.hby = None
+        self.store = store
 
     def initWallet(self):
         kwa = dict()
@@ -56,13 +57,13 @@ class Agent:
             cloner = self.hby.db.clonePreIter(pre=prefix, fn=0)  # create iterator at 0
             for msg in cloner:
                 srdr = serdering.SerderKERI(raw=msg)
-                store_kel(prefix, srdr.sn, msg.decode("utf-8"))
+                self.store.store_kel(prefix, srdr.sn, msg.decode("utf-8"))
             return prefix
         else:
             return None
         
     def queryAID(self, prefix):
-        aid = get_aid(prefix)
+        aid = self.store.get_aid(prefix)
         kever = self.hby.kevers[aid['prefix']]
         wits = kever.wits
         # TODO search for a known witness
@@ -73,11 +74,11 @@ class Agent:
         return 
         
     def watchAID(self, prefix):
-        aid = get_aid(prefix)
+        aid = self.store.get_aid(prefix)
         if aid:
             if not aid['cardano']:
                 self.resolveOobi(alias=aid['alias'], oobi=aid['oobi'])
-            return get_kel(prefix)
+            return self.store.get_kel(prefix)
         else:
             return []
         
@@ -89,7 +90,7 @@ class Agent:
         serdery = serdering.Serdery(version=Version)
         try:
             serder = serdery.reap(ims=bytearray(msg, encoding='utf8'))
-            if not get_aid(serder.pre):
+            if not self.store.get_aid(serder.pre):
                 aid = {
                     "prefix": serder.pre,
                     "alias": serder.pre,
@@ -97,13 +98,13 @@ class Agent:
                     "watched": True,
                     'oobi': 'NA'
                 }
-                store_aid(aid)
+                self.store.store_aid(aid)
                 print("New AID discovered on Cardano", serder.pre)
 
             cloner = self.hby.db.clonePreIter(pre=serder.pre, fn=0)  # create iterator at 0
             for msg in cloner:
                 srdr = serdering.SerderKERI(raw=msg)
-                store_kel(serder.pre, srdr.sn, msg.decode("utf-8"))
+                self.store.store_kel(serder.pre, srdr.sn, msg.decode("utf-8"))
 
         except Exception as e:
             print(e)

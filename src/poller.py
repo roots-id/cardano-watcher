@@ -1,7 +1,7 @@
 """Witness Poller"""
 import threading
 import time
-from store import list_aids, list_witnesses, store_witness_status
+from store import Store
 from agent import Agent
 import os
 from blockfrost import BlockFrostApi, ApiError, ApiUrls
@@ -16,8 +16,9 @@ POLLING_DELAY = 30 # seconds
 
 
 class Poller(threading.Thread):
-    def __init__(self, agent: Agent):
+    def __init__(self, agent: Agent, store: Store):
         self.agent = agent
+        self.store = store
         self.api = BlockFrostApi(
             project_id=BLOCKFROST_PROJECT_ID,
             base_url=ApiUrls.preview.value
@@ -29,7 +30,7 @@ class Poller(threading.Thread):
         while True:
             # AIDs POLLER
             print("Polling AIDs")
-            aids = list_aids()
+            aids = self.store.list_aids()
             for aid in aids:
                 if aid['watched'] and not aid['cardano']:
                     self.agent.resolveOobi(alias=aid['alias'], oobi=aid['oobi'])
@@ -49,11 +50,11 @@ class Poller(threading.Thread):
 
             # WITNESS POLLER
             print("Polling Witnesses")
-            witnesses = list_witnesses()
+            witnesses = self.store.list_witnesses()
             for wit in witnesses:
                 if wit['oobi'] != 'NA':
                     ping = requests.get(wit['oobi'])
-                    store_witness_status(wit['prefix'], ping.status_code)
+                    self.store.store_witness_status(wit['prefix'], ping.status_code)
 
             time.sleep(POLLING_DELAY)
 

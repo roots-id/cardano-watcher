@@ -6,8 +6,8 @@
 echo; read -rsn1 -p "Press any key start..."; echo
 
 printf "%s " "Adding 2 witnesses"
-curl -X POST --data '{"alias":"wan","prefix":"BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha","provider":"local","oobi":"http://127.0.0.1:5642/oobi/BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha/controller"}' --header "Content-Type: application/json" localhost:8000/witnesses
-curl -X POST --data '{"alias":"wil","prefix":"BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM","provider":"local","oobi":"http://127.0.0.1:5643/oobi/BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM/controller"}' --header "Content-Type: application/json" localhost:8000/witnesses
+curl -X POST --data '{"alias":"wan","prefix":"BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha","provider":"local","oobi":"http://127.0.0.1:5642/oobi/BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha/controller","referral":"local"}' --header "Content-Type: application/json" localhost:8000/witnesses
+curl -X POST --data '{"alias":"wil","prefix":"BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM","provider":"local","oobi":"http://127.0.0.1:5643/oobi/BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM/controller","referral":"local"}' --header "Content-Type: application/json" localhost:8000/witnesses
 
 echo; read -rsn1 -p "Press any key continue..."; echo
 

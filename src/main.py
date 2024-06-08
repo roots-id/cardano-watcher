@@ -3,7 +3,8 @@ from fastapi import Request, FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response, RedirectResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness, generate_stats, get_user, get_users, get_aid
+# from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness, generate_stats, get_user, get_users, get_aid
+from store import Store
 from agent import Agent
 from contextlib import asynccontextmanager
 from poller import Poller
@@ -12,11 +13,12 @@ import os
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.agent = Agent(name='watcher', bran=WATCHER_BRAN)
+    app.state.store = Store()
+    app.state.agent = Agent(name='watcher', bran=WATCHER_BRAN, store=app.state.store)
     app.state.agent.initWallet()
-    Poller(agent=app.state.agent).start()
-    for user in get_users():
-        if get_aid(user['prefix']) is None:
+    Poller(agent=app.state.agent, store = app.state.store).start()
+    for user in app.state.store.get_users():
+        if app.state.store.get_aid(user['prefix']) is None:
             if pre := app.state.agent.resolveOobi(alias = user["name"], oobi=user["oobi"]):
                 aid = AID(alias=user["name"], 
                           prefix=pre, 
@@ -24,7 +26,7 @@ async def lifespan(app: FastAPI):
                           watched=True, 
                           cardano=False)
                 aid.prefix = pre
-                store_aid(aid.model_dump())
+                app.state.store.store_aid(aid.model_dump())
             
     yield
 
@@ -60,7 +62,7 @@ app.add_middleware(
 
 @app.get("/aids")
 def get_aids():
-    return list_aids()
+    return app.state.store.list_aids()
 
 @app.get("/aids/{prefix}")
 async def get_kel(prefix: str):
@@ -68,21 +70,21 @@ async def get_kel(prefix: str):
 
 @app.delete("/aids/{prefix}")
 async def delete_aid(prefix: str, request: Request):
-    if SIGNED_HEADERS_VERIFICATION and (not get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
+    if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
         return HTTPException(status_code=401, detail="Unauthorized")
-    if remove_aid(prefix):
+    if app.state.store.remove_aid(prefix):
         return Response(status_code=200)
     else:
         return HTTPException(status_code=404, detail="AID Not Found")
 
 @app.post("/aids")
 def add_aid(aid: AID, request: Request):
-    if SIGNED_HEADERS_VERIFICATION and (not get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
+    if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
         return HTTPException(status_code=401, detail="Unauthorized")
     try:
         if pre := app.state.agent.resolveOobi(alias=aid.alias,oobi=aid.oobi):
             aid.prefix = pre
-            store_aid(aid.model_dump())
+            app.state.store.store_aid(aid.model_dump())
             return Response(status_code=200)
         else:
             return HTTPException(status_code=404, detail="OOBI Not Found")
@@ -92,26 +94,26 @@ def add_aid(aid: AID, request: Request):
 
 @app.get("/witnesses")
 def get_witnesses():
-    return list_witnesses()
+    return app.state.store.list_witnesses()
 
 @app.delete("/witnesses/{prefix}")
 async def delete_witness(prefix: str, request: Request):
-    if SIGNED_HEADERS_VERIFICATION and (not get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
+    if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
         return HTTPException(status_code=401, detail="Unauthorized")
-    if remove_witness(prefix):
+    if app.state.store.remove_witness(prefix):
         return Response(status_code=200)
     else:
         return HTTPException(status_code=404, detail="Witness Not Found")
 
 @app.post("/witnesses")
 def add_witness(wit: Witness, request: Request):
-    if SIGNED_HEADERS_VERIFICATION and (not get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
+    if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
         return HTTPException(status_code=401, detail="Unauthorized")
     try:
         if pre := app.state.agent.resolveOobi(alias=wit.alias,oobi=wit.oobi):
             wit.prefix = pre
-            store_witness(wit.model_dump())
-            app.state.agent.createAidForWitness(prefix=pre)
+            app.state.store.store_witness(wit.model_dump())
+            app.state.agent.createAidForWitness(witness_pre=pre)
             return Response(status_code=200)
         else:
             return HTTPException(status_code=404, detail="OOBI Not Found")
@@ -121,7 +123,7 @@ def add_witness(wit: Witness, request: Request):
     
 @app.get("/stats")
 def get_stats():
-    return generate_stats()
+    return app.state.store.generate_stats()
 
 @app.get("/")
 def index():
