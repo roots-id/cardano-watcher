@@ -1,13 +1,13 @@
 from pymongo import MongoClient
-from bson.objectid import ObjectId
 import datetime
 import os
 import urllib.parse
 from keri.core import serdering
 import mongomock
+import sys
 class Store():
-    def __init__(self, mock=False):
-        if mock:
+    def __init__(self):
+        if "pytest" in sys.modules:
             self.db = mongomock.MongoClient().watcher
         else:
             try:

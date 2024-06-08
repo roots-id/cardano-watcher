@@ -1,9 +1,8 @@
 import uvicorn
-from fastapi import Request, FastAPI, HTTPException
+from fastapi import Request, FastAPI, HTTPException, status
 from fastapi.responses import FileResponse, Response, RedirectResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-# from store import list_aids, store_aid, list_witnesses, store_witness, remove_aid, remove_witness, generate_stats, get_user, get_users, get_aid
 from store import Store
 from agent import Agent
 from contextlib import asynccontextmanager
@@ -68,58 +67,50 @@ def get_aids():
 async def get_kel(prefix: str):
     return app.state.agent.watchAID(prefix=prefix)
 
-@app.delete("/aids/{prefix}")
+@app.delete("/aids/{prefix}",status_code=status.HTTP_204_NO_CONTENT)
 async def delete_aid(prefix: str, request: Request):
     if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
-        return HTTPException(status_code=401, detail="Unauthorized")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
     if app.state.store.remove_aid(prefix):
-        return Response(status_code=200)
+        return
     else:
-        return HTTPException(status_code=404, detail="AID Not Found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="AID Not Found")
 
-@app.post("/aids")
+@app.post("/aids",status_code=status.HTTP_204_NO_CONTENT)
 def add_aid(aid: AID, request: Request):
     if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
-        return HTTPException(status_code=401, detail="Unauthorized")
-    try:
-        if pre := app.state.agent.resolveOobi(alias=aid.alias,oobi=aid.oobi):
-            aid.prefix = pre
-            app.state.store.store_aid(aid.model_dump())
-            return Response(status_code=200)
-        else:
-            return HTTPException(status_code=404, detail="OOBI Not Found")
-    except Exception as e:
-        print("Error: ", e)
-        return HTTPException(status_code=400, detail="Bad Request")
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+    if pre := app.state.agent.resolveOobi(alias=aid.alias,oobi=aid.oobi):
+        aid.prefix = pre
+        app.state.store.store_aid(aid.model_dump())
+        return
+    else:
+        raise HTTPException(status_code=404, detail="OOBI Not Found")
 
 @app.get("/witnesses")
 def get_witnesses():
     return app.state.store.list_witnesses()
 
-@app.delete("/witnesses/{prefix}")
+@app.delete("/witnesses/{prefix}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_witness(prefix: str, request: Request):
     if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
-        return HTTPException(status_code=401, detail="Unauthorized")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
     if app.state.store.remove_witness(prefix):
-        return Response(status_code=200)
+        return
     else:
-        return HTTPException(status_code=404, detail="Witness Not Found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Witness Not Found")
 
-@app.post("/witnesses")
+@app.post("/witnesses", status_code=status.HTTP_204_NO_CONTENT)
 def add_witness(wit: Witness, request: Request):
     if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
-        return HTTPException(status_code=401, detail="Unauthorized")
-    try:
-        if pre := app.state.agent.resolveOobi(alias=wit.alias,oobi=wit.oobi):
-            wit.prefix = pre
-            app.state.store.store_witness(wit.model_dump())
-            app.state.agent.createAidForWitness(witness_pre=pre)
-            return Response(status_code=200)
-        else:
-            return HTTPException(status_code=404, detail="OOBI Not Found")
-    except Exception as e:
-        print("Error: ", e)
-        return HTTPException(status_code=400, detail="Bad Request")
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+    if pre := app.state.agent.resolveOobi(alias=wit.alias,oobi=wit.oobi):
+        wit.prefix = pre
+        app.state.store.store_witness(wit.model_dump())
+        app.state.agent.createAidForWitness(witness_pre=pre)
+        return
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="OOBI Not Found")
     
 @app.get("/stats")
 def get_stats():
