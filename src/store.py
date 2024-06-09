@@ -95,8 +95,8 @@ class Store():
             "cardanoAids": self.db.aids.count_documents({"cardano": True}),
             "witnesses": self.db.wits.count_documents({}),
             "keyEventsTotal": self.db.kels.count_documents({}),
-            "keyEventsMean": self.db.kels.count_documents({}) / self.db.aids.count_documents({}),
-            "witnessesAvailability": self.db.wit_pings.count_documents({"status": 200}) / self.db.wit_pings.count_documents({})
+            "keyEventsMean": self.db.kels.count_documents({}) / (self.db.aids.count_documents({}) if self.db.aids.count_documents({}) > 0 else 1),
+            "witnessesAvailability": self.db.wit_pings.count_documents({"status": 200}) / (self.db.wit_pings.count_documents({}) if self.db.wit_pings.count_documents({}) > 0 else 1)
         }
 
     def get_users(self):

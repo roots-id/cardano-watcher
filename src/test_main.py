@@ -1,3 +1,7 @@
+'''
+This tests require kli witness demo
+'''
+
 from fastapi.testclient import TestClient
 from main import app
 from store import Store
@@ -42,7 +46,7 @@ def test_aids():
     response = client.delete("/aids/EF3V0uUvP3o4awSSNqJ9wUpG_BdamZgr9S9K_GLNWDZ9")
     assert response.status_code == 404
     assert response.json() == {'detail': 'AID Not Found'}
-    
+
 def test_wits():
     response = client.get("/witnesses")
     assert response.status_code == 200
@@ -100,3 +104,15 @@ def test_wits():
         })
     assert response.status_code == 404
     assert response.json() == {'detail': 'OOBI Not Found'}
+
+def test_stats():
+    response = client.get("/stats")
+    assert response.status_code == 200
+    assert response.json() == {
+        'aids': 0,
+        'cardanoAids': 0,
+        'keyEventsMean': 1.0,
+        'keyEventsTotal': 1,
+        'witnesses': 0,
+        'witnessesAvailability': 0.0
+        }
