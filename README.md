@@ -38,7 +38,8 @@ docker run --name mongo_example -d mongo
   -  `export MONGODB_USER={ MONGODB_USER }` default to None
   -  `export MONGODB_PASSWORD={ MONGODB_PASSWORD }` default to None
   -  `export WATCHER_BRAN={ WATCHER_BRAN }` default to None
--  Run the backend app `python app.py` or with `gunicorn app:app`
+-  Install requirements `pip install -r requirements.txt`
+-  Run the backend app `python ./src/main.py`
 -  
 
 ### Frontend

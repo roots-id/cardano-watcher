@@ -53,8 +53,12 @@ class Poller(threading.Thread):
             witnesses = self.store.list_witnesses()
             for wit in witnesses:
                 if wit['oobi'] != 'NA':
-                    ping = requests.get(wit['oobi'])
-                    self.store.store_witness_status(wit['prefix'], ping.status_code)
+                    try:
+                        ping = requests.get(wit['oobi'])
+                        self.store.store_witness_status(wit['prefix'], ping.status_code)
+                    except requests.exceptions.ConnectionError:
+                        self.store.store_witness_status(wit['prefix'], 404)
+
 
             time.sleep(POLLING_DELAY)
 
