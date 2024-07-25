@@ -45,7 +45,7 @@ class Store():
         return list(aids)
 
     def store_witness(self, wit):
-        print("About to store witness", wit.prefix)
+        print("About to store witness")
         result = self.db.wits.replace_one({"prefix": wit['prefix']}, wit, upsert=True)
         print("Raw result", result.raw_result)
         print("Matched count", result.matched_count)
