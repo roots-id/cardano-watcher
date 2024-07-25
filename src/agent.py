@@ -44,8 +44,12 @@ class Agent:
         print(f'Watcher AID {hab.pre}')
 
     def createAidForWitness(self, witness_pre):
-        hab = self.hby.makeHab(name='for-witness-' + witness_pre, transferable=True, icount=1, ncount=1,isith=1,nsith=1, toad=1, wits=[witness_pre])
-        return hab.pre
+        try:
+            hab = self.hby.makeHab(name='for-witness-' + witness_pre, transferable=True, icount=1, ncount=1,isith=1,nsith=1, toad=1, wits=[witness_pre])
+            return hab.pre
+        except Exception as e:
+            print("Error creating AID for witness",e)
+
 
     def resolveOobi(self, alias, oobi):
         doers = [OobiDoer(name=self.name, oobi=oobi, oobiAlias=alias, hby = self.hby)]

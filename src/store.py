@@ -45,10 +45,18 @@ class Store():
         return list(aids)
 
     def store_witness(self, wit):
-        self.db.wits.replace_one({"prefix": wit['prefix']}, wit, upsert=True)
+        print("About to store witness", wit.prefix)
+        result = self.db.wits.replace_one({"prefix": wit['prefix']}, wit, upsert=True)
+        print("Raw result", result.raw_result)
+        print("Matched count", result.matched_count)
+        print("Modified count", result.modified_count)
+        print("Upserted id", result.upserted_id)
 
     def remove_witness(self, prefix):
+        print("About to remove witness", prefix)
         delete_result = self.db.wits.delete_one({"prefix": prefix})
+        print("Deleted raw result", delete_result.raw_result)
+        print("Deleted result count", delete_result.deleted_count)
         if delete_result.deleted_count == 1:
             return True
         else:
