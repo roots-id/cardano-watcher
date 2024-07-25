@@ -79,7 +79,7 @@ async def delete_aid(prefix: str, request: Request):
 @app.post("/aids",status_code=status.HTTP_204_NO_CONTENT)
 def add_aid(aid: AID, request: Request):
     if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
-        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
     if pre := app.state.agent.resolveOobi(alias=aid.alias,oobi=aid.oobi):
         aid.prefix = pre
         app.state.store.store_aid(aid.model_dump())
@@ -103,7 +103,7 @@ async def delete_witness(prefix: str, request: Request):
 @app.post("/witnesses", status_code=status.HTTP_204_NO_CONTENT)
 def add_witness(wit: Witness, request: Request):
     if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
-        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
     print("Adding Witness")
     if pre := app.state.agent.resolveOobi(alias=wit.alias,oobi=wit.oobi):
         wit.prefix = pre
