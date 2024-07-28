@@ -104,14 +104,10 @@ async def delete_witness(prefix: str, request: Request):
 def add_witness(wit: Witness, request: Request):
     if SIGNED_HEADERS_VERIFICATION and (not app.state.store.get_user(request.headers.get('Signify-Resource')) or not app.state.agent.verifyHeaders(request)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
-    print("Adding Witness")
     if pre := app.state.agent.resolveOobi(alias=wit.alias,oobi=wit.oobi):
         wit.prefix = pre
-        print("Witness prefix", wit.prefix)
         app.state.store.store_witness(wit.model_dump())
-        print("Witness stored")
         app.state.agent.createAidForWitness(witness_pre=pre)
-        print("AID created for witness", pre)
         return
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="OOBI Not Found")

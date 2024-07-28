@@ -9,8 +9,8 @@ from pycardano import *
 import requests
 
 
-NETWORK = Network.TESTNET
 BLOCKFROST_PROJECT_ID = os.environ['BLOCKFROST_API_KEY']
+NETWORK = Network.MAINNET if BLOCKFROST_PROJECT_ID.startswith('mainnet') else Network.TESTNET
 METADATA_LABEL = int(''.join([str(ord(char) - 96) for char in 'KERIWATCHER'.lower()]))
 POLLING_DELAY = 30 # seconds
 
