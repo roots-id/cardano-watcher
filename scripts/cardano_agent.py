@@ -10,8 +10,8 @@ import sys
 
 METADATA_LABEL = int(''.join([str(ord(char) - 96) for char in 'KERIWATCHER'.lower()]))
 TRANSACTION_AMOUNT = 1000000
-NETWORK = Network.TESTNET
 BLOCKFROST_PROJECT_ID = os.environ['BLOCKFROST_API_KEY']
+NETWORK = Network.MAINNET if BLOCKFROST_PROJECT_ID.startswith('mainnet') else Network.TESTNET
 CARDANO_ADDRESS_CBORHEX = os.environ['CARDANO_ADDRESS_CBORHEX']
 
 def init(name):
@@ -47,11 +47,12 @@ def submitTransaction(key_event):
         meta = {
             METADATA_LABEL: wrap(key_event, 64)
         }
+        url = ApiUrls.mainnet.value if BLOCKFROST_PROJECT_ID.startswith('mainnet') else ApiUrls.preview.value
         api = BlockFrostApi(
             project_id=BLOCKFROST_PROJECT_ID,
-            base_url=ApiUrls.preview.value
+            base_url= url
         )
-        context = BlockFrostChainContext(BLOCKFROST_PROJECT_ID,NETWORK, ApiUrls.preview.value)
+        context = BlockFrostChainContext(BLOCKFROST_PROJECT_ID,NETWORK, url)
         builder = TransactionBuilder(context)
         payment_signing_key = PaymentSigningKey.from_cbor(CARDANO_ADDRESS_CBORHEX)
         payment_verification_key = PaymentVerificationKey.from_signing_key(payment_signing_key)
@@ -89,8 +90,9 @@ def createEnterpriseAddress():
     payment_signing_key = PaymentSigningKey.from_cbor(payment_signing_key.to_cbor())
     payment_verification_key = PaymentVerificationKey.from_signing_key(payment_signing_key)
     payment_addr = Address(payment_verification_key.hash(), None, network=NETWORK)
+    print("Network:", NETWORK)
     print("Enterprise address:", payment_address)
-    print("Private Key CBORHex:",payment_signing_key.to_cbor())
+    print("Private Key CBORHex:",payment_signing_key.to_cbor().hex())
 
 if __name__ == "__main__":
     cmd = sys.argv[1]

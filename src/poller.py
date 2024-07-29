@@ -21,7 +21,8 @@ class Poller(threading.Thread):
         self.store = store
         self.api = BlockFrostApi(
             project_id=BLOCKFROST_PROJECT_ID,
-            base_url=ApiUrls.preview.value
+            base_url= ApiUrls.mainnet.value if BLOCKFROST_PROJECT_ID.startswith('mainnet') else ApiUrls.preview.value
+
         )
         threading.Thread.__init__(self)
 
